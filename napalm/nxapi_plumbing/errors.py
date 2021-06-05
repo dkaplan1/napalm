@@ -38,12 +38,6 @@ class NXAPIAuthError(NXAPIError):
     pass
 
 
-class NXAPIPostError(NXAPIError):
-    """Exception occurred during HTTP POST to NX-API."""
-
-    pass
-
-
 class NXAPIXMLError(NXAPIError):
     """Exception occurred processing XML response from NX-API."""
 

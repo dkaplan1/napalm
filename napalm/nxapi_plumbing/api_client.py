@@ -17,7 +17,6 @@ from six import string_types
 
 from napalm.nxapi_plumbing.errors import (
     NXAPIError,
-    NXAPIPostError,
     NXAPICommandError,
     NXAPIXMLError,
     NXAPIAuthError,
@@ -77,14 +76,6 @@ class RPCBase(object):
                 "and hostname."
             )
             raise NXAPIAuthError(msg)
-
-        if response.status_code not in [200]:
-            msg = """Invalid status code returned on NX-API POST
-commands: {}
-status_code: {}""".format(
-                commands, response.status_code
-            )
-            raise NXAPIPostError(msg)
 
         return response.text
 

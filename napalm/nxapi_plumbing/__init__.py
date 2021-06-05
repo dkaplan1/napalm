@@ -10,7 +10,6 @@ from napalm.nxapi_plumbing.errors import (
     NXAPICommandError,
     NXAPIConnectionError,
     NXAPIAuthError,
-    NXAPIPostError,
     NXAPIXMLError,
 )
 
@@ -23,6 +22,5 @@ __all__ = (
     "NXAPICommandError",
     "NXAPIConnectionError",
     "NXAPIAuthError",
-    "NXAPIPostError",
     "NXAPIXMLError",
 )
