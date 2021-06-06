@@ -56,7 +56,7 @@ class RPCBase(object):
     def _process_api_response(self, response, commands, raw_text=False):
         raise NotImplementedError("Method must be implemented in child class")
 
-    def _send_request(self, commands, method):
+    def _send_request_to_device(self, commands, method):
         payload = self._build_payload(commands, method)
 
         try:
@@ -78,15 +78,7 @@ class RPCBase(object):
             )
             raise NXAPIAuthError(msg)
 
-        if response.status_code not in [200]:
-            msg = """Invalid status code returned on NX-API POST
-commands: {}
-status_code: {}""".format(
-                commands, response.status_code
-            )
-            raise NXAPIPostError(msg)
-
-        return response.text
+        return response
 
 
 class RPCClient(RPCBase):
@@ -150,7 +142,7 @@ class RPCClient(RPCBase):
         new_response = []
         for response in response_list:
 
-            # Dectect errors
+            # Detect errors
             self._error_check(response)
 
             # Some commands like "show run" can have a None result
@@ -178,6 +170,10 @@ class RPCClient(RPCBase):
                 raise NXAPICommandError(command, error["data"]["msg"])
             else:
                 raise NXAPICommandError(command, "Invalid command.")
+
+    def _send_request(self, commands, method):
+        response = self._send_request_to_device(commands, method)
+        return response.text
 
 
 class XMLClient(RPCBase):
@@ -252,3 +248,15 @@ class XMLClient(RPCBase):
             command = command_obj.text if command_obj is not None else "Unknown command"
             msg = etree.tostring(error_list).decode()
             raise NXAPICommandError(command, msg)
+
+    def _send_request(self, commands, method):
+        response = self._send_request_to_device(commands, method)
+
+        if response.status_code not in [200]:
+            msg = """Invalid status code returned on NX-API POST
+commands: {}
+status_code: {}""".format(
+                commands, response.status_code
+            )
+            raise NXAPIPostError(msg)
+        return response.text

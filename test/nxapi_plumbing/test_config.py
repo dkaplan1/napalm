@@ -1,3 +1,9 @@
+import pytest
+
+from napalm.nxapi_plumbing import NXAPICommandError
+from napalm.nxapi_plumbing.errors import NXAPIPostError
+
+
 def test_config_jsonrpc(mock_pynxos_device):
     result = mock_pynxos_device.config("logging history size 200")
     assert result is None
@@ -36,3 +42,22 @@ def test_config_xml_list(mock_pynxos_device_xml):
         msg = element.find("./msg")
         assert status_code.text == "200"
         assert msg.text == "Success"
+
+
+@pytest.mark.parametrize(
+    'mock_pynxos_device',
+    [500],
+    indirect=True
+)
+def test_config_jsonrpc_doesnt_raise_on_non_500(mock_pynxos_device):
+    result = mock_pynxos_device.config("logging history size 200")
+    assert result is None
+
+@pytest.mark.parametrize(
+    'mock_pynxos_device_xml',
+    [500],
+    indirect=True
+)
+def test_config_xml_does_raise_on_non_500(mock_pynxos_device_xml):
+    with pytest.raises(NXAPIPostError) as e:
+        result = mock_pynxos_device_xml.config("logging history size 200")
