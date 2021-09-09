@@ -348,6 +348,7 @@ class IOSXR(object):
                             command,
                             expect_string=expect_string,
                             delay_factor=delay_factor,
+                            start=start,
                         )
         else:
             output += self.device._read_channel_timing()  # try to read some more
