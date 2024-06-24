@@ -69,6 +69,7 @@ class IOSXRNETCONFDriver(NetworkDriver):
         if optional_args is None:
             optional_args = {}
 
+        self.netmiko_optional_args = optional_args
         self.port = optional_args.get("port", 830)
         self.lock_on_connect = optional_args.get("config_lock", False)
         self.key_file = optional_args.get("key_file", None)
@@ -91,6 +92,7 @@ class IOSXRNETCONFDriver(NetworkDriver):
                 key_filename=self.key_file,
                 timeout=self.timeout,
                 device_params={"name": "iosxr"},
+                **self.netmiko_optional_args,
             )
             if self.lock_on_connect:
                 self._lock()
@@ -442,7 +444,7 @@ class IOSXRNETCONFDriver(NetworkDriver):
             "is_up": False,
             "mac_address": "",
             "description": "",
-            "speed": -1,
+            "speed": -1.0,
             "last_flapped": -1.0,
         }
 
@@ -489,9 +491,9 @@ class IOSXRNETCONFDriver(NetworkDriver):
                 napalm.base.helpers.mac, raw_mac, raw_mac
             )
             speed = napalm.base.helpers.convert(
-                int,
+                float,
                 napalm.base.helpers.convert(
-                    int,
+                    float,
                     self._find_txt(interface_tree, "./int:bandwidth", namespaces=C.NS),
                     0,
                 )
@@ -1855,7 +1857,7 @@ class IOSXRNETCONFDriver(NetworkDriver):
                     ),
                     0,
                 )
-                connection_down_count = napalm.base.helpers.convert(
+                flap_count = napalm.base.helpers.convert(
                     int,
                     self._find_txt(
                         neighbor,
@@ -1995,10 +1997,6 @@ class IOSXRNETCONFDriver(NetworkDriver):
                     ),
                     0,
                 )
-                flap_count = int(connection_down_count / 2)
-                if up:
-                    flap_count -= 1
-
                 if remote_as not in bgp_vrf_neighbors_detail[vrf_name].keys():
                     bgp_vrf_neighbors_detail[vrf_name][remote_as] = []
                 bgp_vrf_neighbors_detail[vrf_name][remote_as].append(
